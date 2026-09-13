@@ -17,7 +17,7 @@ spec:
         - name: ecr-creds
       containers:
         - name: agent
-          image: 920425549926.dkr.ecr.us-west-1.amazonaws.com/sandbox/sandbox_agent:<sha>   # the CLIENT. it spawns the server as a subprocess — one container
+          image: 920425549926.dkr.ecr.us-west-1.amazonaws.com/sandbox/sandbox_agent:d730171708697e0affca1ca3afbd922189a96ae6
           env:
             - name: anthropic-api
               valueFrom:
