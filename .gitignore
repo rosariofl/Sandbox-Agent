@@ -1,6 +1,5 @@
 .env
 .venv*
 approvals
-k8s
 bak*
 list_list_output.json

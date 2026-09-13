@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: sandbox-agent
+  namespace: sandbox
+spec:
+  backoffLimit: 3           # a run that fails — how many auto-retries before stopping?
+  activeDeadlineSeconds: 600   # wall-clock ceiling for the whole run
+  ttlSecondsAfterFinished: 3600   # auto-delete the finished Job after 1h (cleanup, not safety)
+  template:
+    metadata:
+      labels:
+        app: sandbox  
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+        - name: ecr-creds
+      containers:
+        - name: agent
+          image: 920425549926.dkr.ecr.us-west-1.amazonaws.com/sandbox/sandbox_agent:<sha>   # the CLIENT. it spawns the server as a subprocess — one container
+          env:
+            - name: anthropic-api
+              valueFrom:
+                secretKeyRef:
+                  name: anthropic-api
+                  key: ANTHROPIC_API_KEY
+          volumeMounts:
+            - name: approvals
+              mountPath: /app/approvals  
+      volumes:
+        - name: approvals
+          emptyDir: {}
