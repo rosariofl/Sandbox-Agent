@@ -4,20 +4,20 @@ metadata:
   name: sandbox-agent
   namespace: sandbox
 spec:
-  backoffLimit: 3           # a run that fails — how many auto-retries before stopping?
-  activeDeadlineSeconds: 600   # wall-clock ceiling for the whole run
-  ttlSecondsAfterFinished: 3600   # auto-delete the finished Job after 1h (cleanup, not safety)
+  backoffLimit: 3 # a run that fails — how many auto-retries before stopping?
+  activeDeadlineSeconds: 600 # wall-clock ceiling for the whole run
+  ttlSecondsAfterFinished: 3600 # auto-delete the finished Job after 1h (cleanup, not safety)
   template:
     metadata:
       labels:
-        app: sandbox  
+        app: sandbox
     spec:
       restartPolicy: Never
       imagePullSecrets:
         - name: ecr-creds
       containers:
         - name: agent
-          image: 920425549926.dkr.ecr.us-west-1.amazonaws.com/sandbox/sandbox_agent:d730171708697e0affca1ca3afbd922189a96ae6
+          image: 920425549926.dkr.ecr.us-west-1.amazonaws.com/sandbox/sandbox_agent:80cdf2a19c12df1ecc298831621caef71d6f2fce
           env:
             - name: anthropic-api
               valueFrom:
@@ -26,7 +26,7 @@ spec:
                   key: ANTHROPIC_API_KEY
           volumeMounts:
             - name: approvals
-              mountPath: /app/approvals  
+              mountPath: /app/approvals
       volumes:
         - name: approvals
           emptyDir: {}
