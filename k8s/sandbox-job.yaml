@@ -33,6 +33,9 @@ spec:
           volumeMounts:
             - name: approvals
               mountPath: /app/approvals
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: { drop: ["ALL"] }
       volumes:
         - name: approvals
           emptyDir: {}
