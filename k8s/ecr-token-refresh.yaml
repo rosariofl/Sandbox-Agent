@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ecr-token-helper
+  namespace: sandbox
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ecr-token-helper-role
+  namespace: sandbox
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "create", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ecr-token-helper-binding
+  namespace: sandbox
+subjects:
+- kind: ServiceAccount
+  name: ecr-token-helper
+  namespace: sandbox
+roleRef:
+  kind: Role
+  name: ecr-token-helper-role
+  apiGroup: rbac.authorization.k8s.io

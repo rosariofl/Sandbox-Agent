@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: ecr-credential-refresh
+  namespace: sandbox
+spec:
+  schedule: "30 */6 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: ecr-token-helper
+          restartPolicy: OnFailure
+          containers:
+          - name: ecr-token-refresh
+            image: alpine/k8s:1.29.2
+            envFrom:
+            - secretRef:
+                name: aws-credentials
+            command:
+            - /bin/sh
+            - -c
+            - |-
+              kubectl create secret docker-registry ecr-creds \
+                --dry-run=client \
+                --docker-server=920425549926.dkr.ecr.us-west-1.amazonaws.com \
+                --docker-username=AWS \
+                --docker-password=$(aws ecr get-login-password --region us-west-1) \
+                -o yaml | kubectl apply -f -
+                
