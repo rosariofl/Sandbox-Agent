@@ -15,6 +15,12 @@ spec:
       restartPolicy: Never
       imagePullSecrets:
         - name: ecr-creds
+      nodeSelector:
+        kubernetes.io/hostname: ubuntuserver
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile: { type: RuntimeDefault }
       containers:
         - name: agent
           image: 920425549926.dkr.ecr.us-west-1.amazonaws.com/sandbox/sandbox_agent:80cdf2a19c12df1ecc298831621caef71d6f2fce
