@@ -11,8 +11,15 @@ spec:
         spec:
           serviceAccountName: ecr-token-helper
           restartPolicy: OnFailure
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile: { type: RuntimeDefault }
           containers:
           - name: ecr-token-refresh
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities: { drop: ["ALL"] }
             image: alpine/k8s:1.29.2
             envFrom:
             - secretRef:
