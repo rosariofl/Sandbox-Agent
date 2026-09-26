@@ -20,10 +20,10 @@ spec:
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
-        seccompProfile: { type: RuntimeDefault }
+        seccompProfile: {type: RuntimeDefault}
       containers:
         - name: agent
-          image: 920425549926.dkr.ecr.us-west-1.amazonaws.com/sandbox/sandbox_agent:80cdf2a19c12df1ecc298831621caef71d6f2fce
+          image: 920425549926.dkr.ecr.us-west-1.amazonaws.com/sandbox/sandbox_agent:c0aae13cde9b6b1cb0fcdadcbe8c78dc6c00d4ce
           env:
             - name: anthropic-api
               valueFrom:
@@ -35,7 +35,7 @@ spec:
               mountPath: /app/approvals
           securityContext:
             allowPrivilegeEscalation: false
-            capabilities: { drop: ["ALL"] }
+            capabilities: {drop: ["ALL"]}
       volumes:
         - name: approvals
           emptyDir: {}
