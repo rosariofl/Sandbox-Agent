@@ -1,0 +1,15 @@
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: sandbox-egress-se
+  namespace: sandbox
+spec:
+  hosts:
+  - api.anthropic.com
+  - 920425549926.dkr.ecr.us-west-1.amazonaws.com
+  ports:
+  - number: 443
+    name: tls-port
+    protocol: TLS
+  resolution: DNS
+  location: MESH_EXTERNAL

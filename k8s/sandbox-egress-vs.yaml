@@ -1,0 +1,91 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: sandbox-egress-vs
+  namespace: sandbox
+spec:
+  hosts:
+  - api.anthropic.com
+  - "*.dkr.ecr.us-west-1.amazonaws.com"
+  gateways:
+  - mesh
+  - istio-system/egress-gateway   # Notice the istio-system/ prefix!
+  
+  # Anthropic API routes
+  tls:
+  # Hop 1: Sandbox Pod Sidecar -> Egress Gateway (HTTPS)
+  - match:
+    - gateways:
+      - mesh
+      port: 443
+      sniHosts:
+      - api.anthropic.com
+    route:
+    - destination:
+        host: istio-egressgateway.istio-system.svc.cluster.local
+        port:
+          number: 443
+  # Hop 2: Egress Gateway -> External api.anthropic.com (HTTPS)
+  - match:
+    - gateways:
+      - istio-system/egress-gateway   # Notice the istio-system/ prefix!
+      port: 443
+      sniHosts:
+      - api.anthropic.com
+    route:
+    - destination:
+        host: api.anthropic.com
+        port:
+          number: 443
+
+
+  # AWS ECR routes
+  tls:
+  # Hop 1: Sandbox Pod Sidecar -> Egress Gateway (HTTPS)
+  - match:
+    - gateways:
+      - mesh
+      port: 443
+      sniHosts:
+      - "*.dkr.ecr.us-west-1.amazonaws.com"
+    route:
+    - destination:
+        host: istio-egressgateway.istio-system.svc.cluster.local
+        port:
+          number: 443
+  # Hop 2: Egress Gateway -> External "*.dkr.ecr.us-west-1.amazonaws.com" (HTTPS)
+  - match:
+    - gateways:
+      - istio-system/egress-gateway   # Notice the istio-system/ prefix!
+      port: 443
+      sniHosts:
+      - "*.dkr.ecr.us-west-1.amazonaws.com"
+    route:
+    - destination:
+        host: "*.dkr.ecr.us-west-1.amazonaws.com"
+        port:
+          number: 443
+
+
+  # (disabled, because we are using TLS)
+  # http:
+  # # Hop 1: Sandbox Pod Sidecar -> Egress Gateway
+  # - match:
+  #   - gateways:
+  #     - mesh
+  #     port: 80
+  #   route:
+  #   - destination:
+  #       host: istio-egressgateway.istio-system.svc.cluster.local
+  #       port:
+  #         number: 80
+  # Hop 2: Egress Gateway -> External example.com 
+  # - match:
+  #   - gateways:
+  #     - istio-system/egress-gateway   # Notice the istio-system/ prefix!
+  #     port: 80
+  #   route:
+  #   - destination:
+  #       host: example.com
+  #       port:
+  #         number: 80
