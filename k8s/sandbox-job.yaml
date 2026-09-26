@@ -25,7 +25,7 @@ spec:
         - name: agent
           image: 920425549926.dkr.ecr.us-west-1.amazonaws.com/sandbox/sandbox_agent:c0aae13cde9b6b1cb0fcdadcbe8c78dc6c00d4ce
           env:
-            - name: anthropic-api
+            - name: ANTHROPIC_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: anthropic-api
