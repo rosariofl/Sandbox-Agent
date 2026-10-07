@@ -33,10 +33,11 @@ spec:
                   key: ANTHROPIC_API_KEY
           volumeMounts:
             - name: approvals
-              mountPath: /app/approvals
+              mountPath: /approvals
           securityContext:
             allowPrivilegeEscalation: false
             capabilities: {drop: ["ALL"]}
       volumes:
-        - name: approvals
-          emptyDir: {}
+      - name: approvals
+        persistentVolumeClaim:
+          claimName: sandbox-approvals-pvc
