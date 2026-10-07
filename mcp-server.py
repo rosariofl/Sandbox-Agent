@@ -18,9 +18,6 @@ WELLS = {
 }
 
 def audit(action: str, args: dict, allowed: bool, reason: str = "", approved_by: dict = None ):
-    # HOLE 1: emit ONE structured JSON line to stderr capturing who/what/when/allowed.
-    # Why stderr and not stdout? Reason about it before you write this. (Answer below —
-    # but predict first.)
     audit_trail = {
         "timestamp": datetime.now(timezone.utc).astimezone(mountain_tz).isoformat(),
         "action": action,
@@ -47,6 +44,25 @@ def get_file_stats(approval_file) -> dict:
     except FileNotFoundError as e:
         return f"ERROR: File not found: {approval_file}. Exception: {str(e)}"
 
+
+def consume_approval_file(approval_file: str, consumed_dir: str, site_id: str) -> None:
+    """Move the approval file to the consumed directory with a timestamp."""
+    try:
+        os.makedirs(consumed_dir, exist_ok=True)
+    except Exception as e:
+        return audit("Create Consumed Directory", {"Directory": "Not available", "note": ""}, False, f"Failed: Unable to create consumed directory. Exception: {str(e)}")
+    timestamp = datetime.now(timezone.utc).astimezone(mountain_tz).strftime("%Y%m%dT%H%M%S")
+    new_file_name = f"{site_id}-{timestamp}.consumed"
+    new_file_path = os.path.join(consumed_dir, new_file_name)
+    try:
+        os.rename(approval_file, new_file_path)
+    except Exception as e:
+        return audit("Consume Approval", {"Approval file": "Available", "note": ""}, False, f"Failed: Unable to move approval file. Exception: {str(e)}")
+    if approval_file and os.path.exists(approval_file):
+        audit("Consume Approval", {"Approval file": "Available", "note": ""}, False, "Failed: Approval file was not consumed.")
+    elif os.path.exists(new_file_path):
+        audit("Consume Approval", {"Approval file": "Consumed", "note": ""}, True, "Success: Approval files consumed.")
+
     
 @mcp.tool()
 def read_wells(region: str) -> str:
@@ -57,8 +73,11 @@ def read_wells(region: str) -> str:
         return f"No data for region {region!r}."
     return json.dumps(WELLS[region])
 
+
 FLAGGED_SITES = {}
 APPROVAL_DIR = os.environ.get("APPROVAL_DIR", "./approvals")
+CONSUMED_DIR = os.environ.get("CONSUMED_DIR", f"{APPROVAL_DIR}/consumed")
+
 
 @mcp.tool()
 def flag_site(site_id: str, note: str) -> str:
@@ -69,12 +88,21 @@ def flag_site(site_id: str, note: str) -> str:
         return f"Site ID {site_id!r} not found."
 
 
-    approval_path = os.path.join(APPROVAL_DIR, f"{site_id}.approved")
-    approved = os.path.exists(approval_path)
+    approval_path = os.path.join(APPROVAL_DIR, f"{site_id}.approved") 
+    # ctime, not birth time: accidental inode changes (restore/rsync/chmod) can make
+    # an old approval look fresh. Accepted: only approvers can write this volume.
+    approval_creation_time = os.path.getctime(approval_path) if os.path.exists(approval_path) else None
+    current_time = datetime.now(timezone.utc).timestamp()
 
-    if not approved:
-        audit("flag_site", {"site_id": site_id, "note": note}, False,
-              "Blocked: awaiting out-of-band human approval.")
+    if approval_path and os.path.exists(approval_path):
+        if (current_time - approval_creation_time) > 3600: 
+            audit("flag_site", {"site_id": site_id, "note": note}, False, "Blocked: Found stale approval. Removing approval file and requiring new approval.")
+            consume_approval_file(approval_path, CONSUMED_DIR, site_id)
+            return f"Blocked: {site_id!r} Found stale approval. requires human approval. No action taken."
+        else:
+            pass  # Approval file exists and is recent, proceed to flag the site
+    else:
+        audit("flag_site", {"site_id": site_id, "note": note}, False, "Blocked: awaiting out-of-band human approval.")
         return f"Blocked: {site_id!r} requires human approval. No action taken."
 
     FLAGGED_SITES[site_id] = {
@@ -92,7 +120,10 @@ def flag_site(site_id: str, note: str) -> str:
             "consumed_date": datetime.now(timezone.utc).astimezone(mountain_tz).isoformat()
             }
         )
+    
 
+    consume_approval_file(approval_path, CONSUMED_DIR, site_id)
+    
     return f"Site {site_id!r} flagged. (approved via {approval_path})"
 
 

@@ -21,6 +21,7 @@ spec:
         runAsNonRoot: true
         runAsUser: 1000
         seccompProfile: {type: RuntimeDefault}
+        fsGroup: 2000
       containers:
         - name: agent
           image: 920425549926.dkr.ecr.us-west-1.amazonaws.com/sandbox/sandbox_agent:c0aae13cde9b6b1cb0fcdadcbe8c78dc6c00d4ce
