@@ -31,6 +31,8 @@ spec:
                 secretKeyRef:
                   name: anthropic-api
                   key: ANTHROPIC_API_KEY
+            - name: APPROVAL_DIR
+              value: /app/approvals
           volumeMounts:
             - name: approvals
               mountPath: /app/approvals

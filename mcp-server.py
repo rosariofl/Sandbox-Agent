@@ -124,7 +124,7 @@ def flag_site(site_id: str, note: str) -> str:
 
     consume_approval_file(approval_path, CONSUMED_DIR, site_id)
     
-    return f"Site {site_id!r} flagged. (approved via {approval_path})"
+    return f"Site {site_id!r} flagged."
 
 
 if __name__ == "__main__":
