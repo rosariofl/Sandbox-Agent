@@ -5,6 +5,8 @@ metadata:
   namespace: sandbox
   # label? think: should this pod be under the default-deny NetworkPolicy?
 spec:
+  nodeSelector:
+    kubernetes.io/hostname: ubuntuserver
   securityContext:
     runAsNonRoot: true
     runAsUser: 1000
