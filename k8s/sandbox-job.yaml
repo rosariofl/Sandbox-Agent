@@ -33,7 +33,7 @@ spec:
                   key: ANTHROPIC_API_KEY
           volumeMounts:
             - name: approvals
-              mountPath: /approvals
+              mountPath: /app/approvals
           securityContext:
             allowPrivilegeEscalation: false
             capabilities: {drop: ["ALL"]}
