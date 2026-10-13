@@ -24,7 +24,7 @@ spec:
         fsGroup: 2000
       containers:
         - name: agent
-          image: 920425549926.dkr.ecr.us-west-1.amazonaws.com/sandbox/sandbox_agent:211a41b829e65a4e57267f7dfb5e5e4f33eceb54
+          image: 920425549926.dkr.ecr.us-west-1.amazonaws.com/sandbox/sandbox_agent:b672cfd535b1435a1fbe8044d5938b74fbc177bd
           env:
             - name: ANTHROPIC_API_KEY
               valueFrom:
@@ -40,6 +40,6 @@ spec:
             allowPrivilegeEscalation: false
             capabilities: {drop: ["ALL"]}
       volumes:
-      - name: approvals
-        persistentVolumeClaim:
-          claimName: sandbox-approvals-pvc
+        - name: approvals
+          persistentVolumeClaim:
+            claimName: sandbox-approvals-pvc
