@@ -2,11 +2,11 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: approver
+  labels:
+    app: approver
   namespace: sandbox
   annotations:
     sidecar.istio.io/inject: "false"
-  labels:
-    name: approver
 spec:
   nodeSelector:
     kubernetes.io/hostname: ubuntuserver
