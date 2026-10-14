@@ -6,5 +6,5 @@ metadata:
 spec:
   podSelector: 
     matchLabels:
-      name: approver          # empty selector = every pod in this namespace
+      app: approver          # empty selector = every pod in this namespace
   policyTypes: [Ingress, Egress]

@@ -5,6 +5,8 @@ metadata:
   namespace: sandbox
   annotations:
     sidecar.istio.io/inject: "false"
+  labels:
+    name: approver
 spec:
   nodeSelector:
     kubernetes.io/hostname: ubuntuserver
